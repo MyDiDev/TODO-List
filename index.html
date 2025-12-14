@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasky - Sistema de Gestión de Tareas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <aside class="sidebar position-fixed start-0 top-0 h-100 bg-light border-end">
+        <div class="logo d-flex align-items-center gap-2 mb-5">
+            <i class="fas fa-calculator fs-4"></i>
+            <span class="fw-bolder text-primary fs-4">Tasky</span>
+        </div>
+        <nav class="nav-menu d-flex flex-column gap-2">
+            <a href="#" class="nav-item active d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+                <i class="fas fa-tasks"></i>
+                <span>Tareas</span>
+            </a>
+            <a href="#" class="nav-item d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+                <i class="fas fa-calendar"></i>
+                <span>Calendario</span>
+            </a>
+            <a href="#" class="nav-item d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+                <i class="fas fa-users"></i>
+                <span>Miembros</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="header bg-white shadow-sm sticky-top">
+            <div class="container-fluid d-flex justify-content-between align-items-center py-3">
+                <div class="search-bar d-flex align-items-center gap-2 bg-light rounded px-3" style="width: 400px;">
+                    <i class="fas fa-search text-muted"></i>
+                    <input type="text" class="form-control border-0 bg-transparent" placeholder="Buscar tareas"
+                        id="searchInput">
+                </div>
+                <div class="header-actions d-flex align-items-center gap-3">
+                    <div class="profile-picture">
+                        <img src="https://ui-avatars.com/api/?name=User&background=4A90E2&color=fff" alt="Profile"
+                            class="rounded-circle" style="width: 40px; height: 40px;">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="task-section container-fluid py-4">
+            <div class="task-controls d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div class="control-buttons d-flex gap-2">
+                    <button class="btn btn-outline-secondary d-flex align-items-center gap-2" id="previewBtn">
+                        <i class="fas fa-th"></i>
+                        <span>Vista Previa</span>
+                    </button>
+                    <button class="btn btn-outline-secondary d-flex align-items-center gap-2" id="sortBtn">
+                        <i class="fas fa-sort"></i>
+                        <span>Ordenar</span>
+                    </button>
+                    <button class="btn btn-outline-secondary d-flex align-items-center gap-2" id="filterBtn">
+                        <i class="fas fa-filter"></i>
+                        <span>Filtrar</span>
+                    </button>
+                </div>
+                <button class="btn btn-primary d-flex align-items-center gap-2" id="addTaskBtn">
+                    <i class="fas fa-plus"></i>
+                    <span>Agregar Tarea</span>
+                </button>
+            </div>
+
+            <div class="task-columns row g-3">
+                <div class="task-column col-lg-4 col-md-6">
+                    <div class="bg-white rounded p-3 h-100">
+                        <div
+                            class="column-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="mb-0 fw-semibold">En Progreso <span class="text-muted fw-normal"
+                                    id="inProgressCount">(0)</span></h5>
+                            <i class="fas fa-ellipsis-v text-muted" style="cursor: pointer;"></i>
+                        </div>
+                        <div class="task-list d-flex flex-column gap-3" id="inProgressList" data-status="in-progress">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-column col-lg-4 col-md-6">
+                    <div class="bg-white rounded p-3 h-100">
+                        <div
+                            class="column-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="mb-0 fw-semibold">Tareas Completadas <span class="text-muted fw-normal"
+                                    id="completedCount">(0)</span></h5>
+                            <i class="fas fa-ellipsis-v text-muted" style="cursor: pointer;"></i>
+                        </div>
+                        <div class="task-list d-flex flex-column gap-3" id="completedList" data-status="completed">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-column col-lg-4 col-md-6">
+                    <div class="bg-white rounded p-3 h-100">
+                        <div
+                            class="column-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="mb-0 fw-semibold">Atrasadas <span class="text-muted fw-normal"
+                                    id="overdueCount">(0)</span></h5>
+                            <i class="fas fa-ellipsis-v text-muted" style="cursor: pointer;"></i>
+                        </div>
+                        <div class="task-list d-flex flex-column gap-3" id="overdueList" data-status="overdue">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="taskModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Agregar Nueva Tarea</h5>
+                    <button type="button" class="btn-close" id="closeModal" aria-label="Close"></button>
+                </div>
+                <form id="taskForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="taskTitle" class="form-label fw-semibold">Título *</label>
+                            <input type="text" class="form-control" id="taskTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskDescription" class="form-label fw-semibold">Descripción *</label>
+                            <textarea class="form-control" id="taskDescription" name="description" rows="4"
+                                required></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="taskDate" class="form-label fw-semibold">Fecha de Entrega *</label>
+                                <input type="date" class="form-control" id="taskDate" name="date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="taskTime" class="form-label fw-semibold">Hora *</label>
+                                <input type="time" class="form-control" id="taskTime" name="time">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="taskSubject" class="form-label fw-semibold">Materia/Área *</label>
+                                <input type="text" class="form-control" id="taskSubject" name="subject" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="taskPriority" class="form-label fw-semibold">Prioridad *</label>
+                                <select class="form-select" id="taskPriority" name="priority" required>
+                                    <option value="low">Baja</option>
+                                    <option value="medium">Media</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskStatus" class="form-label fw-semibold">Estado *</label>
+                            <select class="form-select" id="taskStatus" name="status" required>
+                                <option value="in-progress">En Progreso</option>
+                                <option value="completed">Completada</option>
+                                <option value="overdue">Atrasada</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Progreso (completada/total) *</label>
+                            <div class="progress-input d-flex align-items-center gap-2">
+                                <input type="number" class="form-control" style="width: 80px;"
+                                    id="taskProgressCompleted" name="progressCompleted" min="0" value="0">
+                                <span class="fs-5 text-muted">/</span>
+                                <input type="number" class="form-control" style="width: 80px;" id="taskProgressTotal"
+                                    name="progressTotal" min="1" value="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Tarea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Filtrar & Ordenar</h5>
+                    <button type="button" class="btn-close" id="closeFilterModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="filter-content">
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">Filtrar por Prioridad:</h6>
+                            <div class="filter-options d-flex flex-column gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input priority-filter" type="checkbox" value="high"
+                                        id="filterHigh">
+                                    <label class="form-check-label" for="filterHigh">Alta</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input priority-filter" type="checkbox" value="medium"
+                                        id="filterMedium">
+                                    <label class="form-check-label" for="filterMedium">Media</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input priority-filter" type="checkbox" value="low"
+                                        id="filterLow">
+                                    <label class="form-check-label" for="filterLow">Baja</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">Filtrar por Materia:</h6>
+                            <input type="text" class="form-control" id="subjectFilter"
+                                placeholder="Ingrese el nombre de la materia">
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="fw-semibold mb-3">Ordenar por:</h6>
+                            <select class="form-select" id="sortBy">
+                                <option value="date">Fecha</option>
+                                <option value="priority">Prioridad</option>
+                                <option value="title">Título</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="clearFilters">Limpiar Filtros</button>
+                    <button type="button" class="btn btn-primary" id="applyFilters">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" id="closeConfirmModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="confirm-content">
+                        <h6 class="fw-semibold mb-3">¿Estás seguro de que deseas eliminar esta tarea?</h6>
+                        <p class="text-muted">Esta acción no se puede deshacer.</p>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" id="cancelConfirmBtn">Cancelar</button>
+                            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="previewModalTitle">Detalles de la Tarea</h5>
+                    <button type="button" class="btn-close" id="closePreviewModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="task-preview-content">
+                        <div class="mb-4">
+                            <h4 class="fw-bold mb-2" id="previewTaskTitle"></h4>
+                            <div class="d-flex flex-wrap gap-2 mb-3" id="previewTaskTags"></div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="fw-semibold mb-2"><i class="fas fa-align-left me-2"></i>Descripción</h6>
+                            <p class="text-muted" id="previewTaskDescription"></p>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-2"><i class="fas fa-calendar me-2"></i>Fecha de Entrega</h6>
+                                <p class="text-muted mb-0" id="previewTaskDate"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-2"><i class="fas fa-clock me-2"></i>Hora</h6>
+                                <p class="text-muted mb-0" id="previewTaskTime"></p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-2"><i class="fas fa-book me-2"></i>Materia/Área</h6>
+                                <p class="text-muted mb-0" id="previewTaskSubject"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-2"><i class="fas fa-flag me-2"></i>Prioridad</h6>
+                                <p class="mb-0" id="previewTaskPriority"></p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-2"><i class="fas fa-info-circle me-2"></i>Estado</h6>
+                                <p class="mb-0" id="previewTaskStatus"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-2"><i class="fas fa-tasks me-2"></i>Progreso</h6>
+                                <p class="text-muted mb-0" id="previewTaskProgress"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="closePreviewModalBtn">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
