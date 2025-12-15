@@ -252,11 +252,9 @@ class TaskManager {
 
     confirmDelete() {
         if (this.taskToDelete !== null) {
-            // Single task deletion
             this.tasks = this.tasks.filter(t => t.id !== this.taskToDelete);
             this.taskToDelete = null;
         } else if (this.statusToDelete !== null) {
-            // Bulk deletion
             this.tasks = this.tasks.filter(t => t.status !== this.statusToDelete);
             this.statusToDelete = null;
         }
