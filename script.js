@@ -96,7 +96,7 @@ class TaskManager {
         document.getElementById('closePreviewModal').onclick = () => this.closePreviewModal();
         document.getElementById('closePreviewModalBtn').onclick = () => this.closePreviewModal();
 
-        // Close dropdown menus when clicking outside
+   
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.task-card-menu-container')) {
                 document.querySelectorAll('.task-card-dropdown').forEach(menu => {
@@ -110,7 +110,7 @@ class TaskManager {
             }
         });
 
-        // Column header menu listeners
+
         document.querySelectorAll('.column-header-menu').forEach(menuIcon => {
             menuIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -119,7 +119,7 @@ class TaskManager {
             });
         });
 
-        // Column header menu action listeners
+
         document.querySelectorAll('.complete-all-tasks').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
