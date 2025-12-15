@@ -18,24 +18,28 @@
 
 <body>
     <aside class="sidebar position-fixed start-0 top-0 h-100 bg-light border-end">
-        <div class="logo d-flex align-items-center gap-2 mb-5">
+        <div class="logo d-flex align-items-center gap-2 mb-2 mt-3 p-4">
             <i class="fas fa-calculator fs-4"></i>
-            <span class="fw-bolder text-primary fs-4">Tasky</span>
+            <span class="fw-bold text-primary fs-4">Tasky</span>
         </div>
         <nav class="nav-menu d-flex flex-column gap-2">
-            <a href="#" class="nav-item active d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+            <a href="#" class="nav-item active d-flex align-items-center gap-3 p-3 text-decoration-none"
+                style="margin-left: 10px; border-radius: 15px 0px 0px 15px;">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+            <a href="#" class="nav-item d-flex align-items-center gap-3 p-3 text-decoration-none"
+                style="margin-left: 10px; border-radius: 15px 0px 0px 15px;">
                 <i class="fas fa-tasks"></i>
                 <span>Tareas</span>
             </a>
-            <a href="#" class="nav-item d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+            <a href="#" class="nav-item d-flex align-items-center gap-3 p-3 text-decoration-none"
+                style="margin-left: 10px; border-radius: 15px 0px 0px 15px;">
                 <i class="fas fa-calendar"></i>
                 <span>Calendario</span>
             </a>
-            <a href="#" class="nav-item d-flex align-items-center gap-3 px-3 py-2 rounded text-decoration-none">
+            <a href="#" class="nav-item d-flex align-items-center gap-3 p-3 text-decoration-none"
+                style="margin-left: 10px; border-radius: 15px 0px 0px 15px;">
                 <i class="fas fa-users"></i>
                 <span>Miembros</span>
             </a>
@@ -43,7 +47,7 @@
     </aside>
 
     <main class="main-content">
-        <header class="header bg-white shadow-sm sticky-top">
+        <header class="header bg-white sticky-top">
             <div class="container-fluid d-flex justify-content-between align-items-center py-3">
                 <div class="search-bar d-flex align-items-center gap-2 bg-light rounded px-3" style="width: 400px;">
                     <i class="fas fa-search text-muted"></i>
@@ -83,12 +87,25 @@
 
             <div class="task-columns row g-3">
                 <div class="task-column col-lg-4 col-md-6">
-                    <div class="bg-white rounded p-3 h-100">
-                        <div
-                            class="column-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div class="p-3 h-100">
+                        <div class="bg-white p-3 rounded column-header d-flex justify-content-between align-items-center mb-4"
+                            id="description-card">
                             <h5 class="mb-0 fw-semibold">En Progreso <span class="text-muted fw-normal"
                                     id="inProgressCount">(0)</span></h5>
-                            <i class="fas fa-ellipsis-v text-muted" style="cursor: pointer;"></i>
+                            <div class="column-header-menu-container" style="position: relative;">
+                                <i class="fas fa-ellipsis-v text-muted column-header-menu" style="cursor: pointer;" data-column-status="in-progress"></i>
+                                <div class="column-header-dropdown" id="column-menu-in-progress" style="display: none;">
+                                    <button class="dropdown-item complete-all-tasks" data-column-status="in-progress">
+                                        <i class="fas fa-check"></i> Completar Todas
+                                    </button>
+                                    <button class="dropdown-item move-to-completed" data-column-status="in-progress">
+                                        <i class="fas fa-arrow-right"></i> Mover a Completadas
+                                    </button>
+                                    <button class="dropdown-item delete-all-tasks" data-column-status="in-progress">
+                                        <i class="fas fa-trash"></i> Eliminar Todas
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="task-list d-flex flex-column gap-3" id="inProgressList" data-status="in-progress">
                         </div>
@@ -96,25 +113,52 @@
                 </div>
 
                 <div class="task-column col-lg-4 col-md-6">
-                    <div class="bg-white rounded p-3 h-100">
-                        <div
-                            class="column-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div class=" p-3 h-100">
+                        <div class="bg-white p-3 rounded column-header d-flex justify-content-between align-items-center mb-4"
+                            id="description-card">
                             <h5 class="mb-0 fw-semibold">Tareas Completadas <span class="text-muted fw-normal"
                                     id="completedCount">(0)</span></h5>
-                            <i class="fas fa-ellipsis-v text-muted" style="cursor: pointer;"></i>
+                            <div class="column-header-menu-container" style="position: relative;">
+                                <i class="fas fa-ellipsis-v text-muted column-header-menu" style="cursor: pointer;" data-column-status="completed"></i>
+                                <div class="column-header-dropdown" id="column-menu-completed" style="display: none;">
+                                    <button class="dropdown-item move-to-in-progress" data-column-status="completed">
+                                        <i class="fas fa-arrow-left"></i> Mover a En Progreso
+                                    </button>
+                                    <button class="dropdown-item delete-all-tasks" data-column-status="completed">
+                                        <i class="fas fa-trash"></i> Eliminar Todas
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="task-list d-flex flex-column gap-3" id="completedList" data-status="completed">
+                        <div class="rounded task-list d-flex flex-column gap-3" id="completedList"
+                            data-status="completed">
                         </div>
                     </div>
                 </div>
 
                 <div class="task-column col-lg-4 col-md-6">
-                    <div class="bg-white rounded p-3 h-100">
-                        <div
-                            class="column-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div class="p-3 h-100">
+                        <div class="bg-white rounded p-3 rounded column-header d-flex justify-content-between align-items-center mb-4"
+                            id="description-card">
                             <h5 class="mb-0 fw-semibold">Atrasadas <span class="text-muted fw-normal"
                                     id="overdueCount">(0)</span></h5>
-                            <i class="fas fa-ellipsis-v text-muted" style="cursor: pointer;"></i>
+                            <div class="column-header-menu-container" style="position: relative;">
+                                <i class="fas fa-ellipsis-v text-muted column-header-menu" style="cursor: pointer;" data-column-status="overdue"></i>
+                                <div class="column-header-dropdown" id="column-menu-overdue" style="display: none;">
+                                    <button class="dropdown-item complete-all-tasks" data-column-status="overdue">
+                                        <i class="fas fa-check"></i> Completar Todas
+                                    </button>
+                                    <button class="dropdown-item move-to-in-progress" data-column-status="overdue">
+                                        <i class="fas fa-arrow-left"></i> Mover a En Progreso
+                                    </button>
+                                    <button class="dropdown-item move-to-completed" data-column-status="overdue">
+                                        <i class="fas fa-arrow-right"></i> Mover a Completadas
+                                    </button>
+                                    <button class="dropdown-item delete-all-tasks" data-column-status="overdue">
+                                        <i class="fas fa-trash"></i> Eliminar Todas
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="task-list d-flex flex-column gap-3" id="overdueList" data-status="overdue">
                         </div>
@@ -255,7 +299,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="confirm-content">
-                        <h6 class="fw-semibold mb-3">¿Estás seguro de que deseas eliminar esta tarea?</h6>
+                        <h6 class="fw-semibold mb-3" id="confirmDeleteMessage">¿Estás seguro de que deseas eliminar esta tarea?</h6>
                         <p class="text-muted">Esta acción no se puede deshacer.</p>
                         <div class="d-flex justify-content-end gap-2">
                             <button type="button" class="btn btn-secondary" id="cancelConfirmBtn">Cancelar</button>

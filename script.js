@@ -3,17 +3,20 @@ class TaskManager {
         this.tasks = this.loadTasks();
         this.currentEditId = null;
         this.taskToDelete = null;
+        this.statusToDelete = null;
         this.filters = {
             priorities: [],
             subject: '',
             sortBy: 'date'
         };
+        this.viewMode = 'column';
         this.init();
     }
 
     init() {
-        this.renderTasks();
         this.setupEventListeners();
+        this.updateViewModeUI();
+        this.renderTasks();
         this.updateTaskCounts();
     }
 
@@ -63,6 +66,8 @@ class TaskManager {
             this.searchTasks(e.target.value);
         });
 
+        document.getElementById('previewBtn').onclick = () => this.toggleViewMode();
+
         const taskModalElement = document.getElementById('taskModal');
         const filterModalElement = document.getElementById('filterModal');
 
@@ -90,6 +95,62 @@ class TaskManager {
 
         document.getElementById('closePreviewModal').onclick = () => this.closePreviewModal();
         document.getElementById('closePreviewModalBtn').onclick = () => this.closePreviewModal();
+
+        // Close dropdown menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.task-card-menu-container')) {
+                document.querySelectorAll('.task-card-dropdown').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+            if (!e.target.closest('.column-header-menu-container')) {
+                document.querySelectorAll('.column-header-dropdown').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        // Column header menu listeners
+        document.querySelectorAll('.column-header-menu').forEach(menuIcon => {
+            menuIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const status = menuIcon.getAttribute('data-column-status');
+                this.toggleColumnMenu(status);
+            });
+        });
+
+        // Column header menu action listeners
+        document.querySelectorAll('.complete-all-tasks').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const status = btn.getAttribute('data-column-status');
+                this.completeAllTasks(status);
+            });
+        });
+
+        document.querySelectorAll('.delete-all-tasks').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const status = btn.getAttribute('data-column-status');
+                this.deleteAllTasks(status);
+            });
+        });
+
+        document.querySelectorAll('.move-to-completed').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const status = btn.getAttribute('data-column-status');
+                this.moveAllTasksToStatus(status, 'completed');
+            });
+        });
+
+        document.querySelectorAll('.move-to-in-progress').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const status = btn.getAttribute('data-column-status');
+                this.moveAllTasksToStatus(status, 'in-progress');
+            });
+        });
     }
 
     openModal(task = null) {
@@ -177,6 +238,13 @@ class TaskManager {
 
     deleteTask(id) {
         this.taskToDelete = id;
+        this.statusToDelete = null;
+
+        const messageElement = document.getElementById('confirmDeleteMessage');
+        if (messageElement) {
+            messageElement.textContent = '¿Estás seguro de que deseas eliminar esta tarea?';
+        }
+
         if (this.confirmModal) {
             this.confirmModal.show();
         }
@@ -184,12 +252,18 @@ class TaskManager {
 
     confirmDelete() {
         if (this.taskToDelete !== null) {
+            // Single task deletion
             this.tasks = this.tasks.filter(t => t.id !== this.taskToDelete);
-            this.saveTasks();
-            this.renderTasks();
-            this.updateTaskCounts();
             this.taskToDelete = null;
+        } else if (this.statusToDelete !== null) {
+            // Bulk deletion
+            this.tasks = this.tasks.filter(t => t.status !== this.statusToDelete);
+            this.statusToDelete = null;
         }
+
+        this.saveTasks();
+        this.renderTasks();
+        this.updateTaskCounts();
         this.closeConfirmModal();
     }
 
@@ -198,6 +272,7 @@ class TaskManager {
             this.confirmModal.hide();
         }
         this.taskToDelete = null;
+        this.statusToDelete = null;
     }
 
     renderTasks() {
@@ -228,13 +303,17 @@ class TaskManager {
             }
         });
 
-        const inProgress = filteredTasks.filter(t => t.status === 'in-progress');
-        const completed = filteredTasks.filter(t => t.status === 'completed');
-        const overdue = filteredTasks.filter(t => t.status === 'overdue');
+        if (this.viewMode === 'grid') {
+            this.renderGridView(filteredTasks);
+        } else {
+            const inProgress = filteredTasks.filter(t => t.status === 'in-progress');
+            const completed = filteredTasks.filter(t => t.status === 'completed');
+            const overdue = filteredTasks.filter(t => t.status === 'overdue');
 
-        this.renderTaskList('inProgressList', inProgress);
-        this.renderTaskList('completedList', completed);
-        this.renderTaskList('overdueList', overdue);
+            this.renderTaskList('inProgressList', inProgress);
+            this.renderTaskList('completedList', completed);
+            this.renderTaskList('overdueList', overdue);
+        }
     }
 
     renderTaskList(listId, tasks) {
@@ -249,7 +328,189 @@ class TaskManager {
         tasks.forEach(task => {
             const taskCard = this.createTaskCard(task);
             listElement.appendChild(taskCard);
+            this.attachMenuListeners(taskCard, task.id);
         });
+    }
+
+    attachMenuListeners(card, taskId) {
+        const menuIcon = card.querySelector('.task-card-menu');
+        const dropdown = card.querySelector('.task-card-dropdown');
+        const completeBtn = card.querySelector('.complete-task');
+        const deleteBtn = card.querySelector('.delete-task');
+
+        if (menuIcon && dropdown) {
+            menuIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleTaskMenu(taskId);
+            });
+        }
+
+        if (completeBtn) {
+            completeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.completeTask(taskId);
+            });
+        }
+
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteTask(taskId);
+            });
+        }
+    }
+
+    toggleTaskMenu(taskId) {
+        document.querySelectorAll('.task-card-dropdown').forEach(menu => {
+            if (menu.id !== `menu-${taskId}`) {
+                menu.style.display = 'none';
+            }
+        });
+
+        const menu = document.getElementById(`menu-${taskId}`);
+        if (menu) {
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    completeTask(id) {
+        const task = this.tasks.find(t => t.id === id);
+        if (task) {
+            task.status = 'completed';
+            this.saveTasks();
+            this.renderTasks();
+            this.updateTaskCounts();
+            const menu = document.getElementById(`menu-${id}`);
+            if (menu) menu.style.display = 'none';
+        }
+    }
+
+    toggleColumnMenu(status) {
+        document.querySelectorAll('.column-header-dropdown').forEach(menu => {
+            if (menu.id !== `column-menu-${status}`) {
+                menu.style.display = 'none';
+            }
+        });
+
+        const menu = document.getElementById(`column-menu-${status}`);
+        if (menu) {
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    isTaskOverdue(task) {
+        if (task.status === 'completed') return false;
+        return this.isTaskDateOverdue(task);
+    }
+
+    isTaskDateOverdue(task) {
+        const taskDate = new Date(task.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        return taskDate < today;
+    }
+
+    completeAllTasks(status) {
+        const tasksToComplete = this.tasks.filter(t => t.status === status);
+        if (tasksToComplete.length === 0) {
+            this.showNoTasksMessage('No hay tareas disponibles para completar');
+            this.closeColumnMenu(status);
+            return;
+        }
+
+        tasksToComplete.forEach(task => {
+            task.status = 'completed';
+        });
+
+        this.saveTasks();
+        this.renderTasks();
+        this.updateTaskCounts();
+        this.closeColumnMenu(status);
+    }
+
+    deleteAllTasks(status) {
+        const tasksToDelete = this.tasks.filter(t => t.status === status);
+        if (tasksToDelete.length === 0) {
+            this.showNoTasksMessage('No hay tareas disponibles para eliminar');
+            this.closeColumnMenu(status);
+            return;
+        }
+
+        this.statusToDelete = status;
+        this.taskToDelete = null;
+
+        const messageElement = document.getElementById('confirmDeleteMessage');
+        if (messageElement) {
+            messageElement.textContent = `¿Estás seguro de que deseas eliminar todas las tareas ${this.getStatusLabel(status)}?`;
+        }
+
+        if (this.confirmModal) {
+            this.confirmModal.show();
+        }
+        this.closeColumnMenu(status);
+    }
+
+    moveAllTasksToStatus(fromStatus, toStatus) {
+        const tasksToMove = this.tasks.filter(t => t.status === fromStatus);
+        if (tasksToMove.length === 0) {
+            const actionLabel = toStatus === 'completed' ? 'mover a completadas' :
+                toStatus === 'in-progress' ? 'mover a en progreso' : 'mover';
+            this.showNoTasksMessage(`No hay tareas disponibles para ${actionLabel}`);
+            this.closeColumnMenu(fromStatus);
+            return;
+        }
+
+        tasksToMove.forEach(task => {
+            if (toStatus === 'in-progress') {
+                if (this.isTaskDateOverdue(task)) {
+                    task.status = 'overdue';
+                } else {
+                    task.status = 'in-progress';
+                }
+            } else if (toStatus === 'completed') {
+                task.status = 'completed';
+            } else {
+                task.status = toStatus;
+            }
+        });
+
+        this.saveTasks();
+        this.renderTasks();
+        this.updateTaskCounts();
+        this.closeColumnMenu(fromStatus);
+    }
+
+    closeColumnMenu(status) {
+        const menu = document.getElementById(`column-menu-${status}`);
+        if (menu) menu.style.display = 'none';
+    }
+
+    getStatusLabel(status) {
+        const labels = {
+            'in-progress': 'en progreso',
+            'completed': 'completadas',
+            'overdue': 'atrasadas'
+        };
+        return labels[status] || status;
+    }
+
+    showNoTasksMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'no-tasks-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
     }
 
     createTaskCard(task) {
@@ -288,7 +549,19 @@ class TaskManager {
                     ${dateDisplay ? `<span class="tag date"><i class="far fa-clock"></i> ${dateDisplay}</span>` : ''}
                     <span class="tag ${categoryClass}">${task.subject}</span>
                 </div>
-                <i class="fas fa-ellipsis-v task-card-menu"></i>
+                <div class="task-card-menu-container" style="position: relative;">
+                    <i class="fas fa-ellipsis-v task-card-menu" data-task-id="${task.id}"></i>
+                    <div class="task-card-dropdown" id="menu-${task.id}" style="display: none;">
+                        ${task.status !== 'completed' ? `
+                        <button class="dropdown-item complete-task" data-task-id="${task.id}">
+                            <i class="fas fa-check"></i> Completar
+                        </button>
+                        ` : ''}
+                        <button class="dropdown-item delete-task" data-task-id="${task.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
             </div>
             <h3 class="task-title">${task.title}</h3>
             <p class="task-description" id="desc-${task.id}">${task.description}</p>
@@ -408,7 +681,12 @@ class TaskManager {
         document.getElementById('overdueCount').textContent = `(${overdue})`;
     }
 
-    searchTasks(query) {
+    async sleep(time) {
+        await new Promise(resolve => setTimeout(resolve, time))
+    }
+
+    async searchTasks(query) {
+        await this.sleep(1200);
         const searchTerm = query.toLowerCase();
         const allCards = document.querySelectorAll('.task-card');
 
@@ -427,7 +705,7 @@ class TaskManager {
     openFilterModal() {
         const priorityFilters = document.querySelectorAll('.priority-filter');
         priorityFilters.forEach(checkbox => checkbox.checked = this.filters.priorities.includes(checkbox.value));
-        
+
         document.getElementById('subjectFilter').value = this.filters.subject;
         document.getElementById('sortBy').value = this.filters.sortBy;
 
@@ -481,6 +759,63 @@ class TaskManager {
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
+    }
+
+    toggleViewMode() {
+        this.viewMode = this.viewMode === 'column' ? 'grid' : 'column';
+        this.updateViewModeUI();
+        this.renderTasks();
+    }
+
+    updateViewModeUI() {
+        const previewBtn = document.getElementById('previewBtn');
+        const taskColumns = document.querySelector('.task-columns');
+        let gridContainer = document.getElementById('gridViewContainer');
+
+        if (this.viewMode === 'grid') {
+            previewBtn.innerHTML = '<i class="fas fa-columns"></i><span>Vista Columnas</span>';
+            previewBtn.classList.add('active');
+
+            if (taskColumns) taskColumns.style.display = 'none';
+
+            if (!gridContainer) {
+                const gridDiv = document.createElement('div');
+                gridDiv.id = 'gridViewContainer';
+                gridDiv.className = 'grid-view-container';
+                const taskSection = document.querySelector('.task-section');
+                if (taskSection && taskColumns) {
+                    taskSection.insertBefore(gridDiv, taskColumns);
+                }
+            } else {
+                gridContainer.style.display = 'grid';
+            }
+        } else {
+            previewBtn.innerHTML = '<i class="fas fa-th"></i><span>Vista Previa</span>';
+            previewBtn.classList.remove('active');
+            if (taskColumns) taskColumns.style.display = '';
+            if (gridContainer) gridContainer.style.display = 'none';
+        }
+    }
+
+    renderGridView(tasks) {
+        const gridContainer = document.getElementById('gridViewContainer');
+        if (!gridContainer) {
+            this.updateViewModeUI();
+            return;
+        }
+
+        gridContainer.innerHTML = '';
+
+        if (tasks.length === 0) {
+            gridContainer.innerHTML = '<p style="text-align: center; color: #7F8C8D; padding: 40px; grid-column: 1 / -1;">No hay tareas</p>';
+            return;
+        }
+
+        tasks.forEach(task => {
+            const taskCard = this.createTaskCard(task);
+            gridContainer.appendChild(taskCard);
+            this.attachMenuListeners(taskCard, task.id);
+        });
     }
 }
 

@@ -1,12 +1,12 @@
 :root {
-    --primary-blue: #4A90E2;
+    --primary-blue: #3838e6;
     --sidebar-bg: #F8F9FA;
     --card-bg: #FFFFFF;
     --text-primary: #2C3E50;
     --text-secondary: #7F8C8D;
     --border-color: #E1E8ED;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-hover: 0 1px 12px rgba(0, 0, 0, 0.10);
     --priority-high: #FF6B6B;
     --priority-medium: #FFA500;
     --priority-low: #50C878;
@@ -22,13 +22,13 @@
 }
 
 body {
-    background-color: #F5F7FA;
+    background-color: white;
     color: var(--text-primary);
 }
 
 .sidebar {
     width: 250px;
-    padding: 20px;
+    padding: 0px;
     z-index: 1000;
 }
 
@@ -74,6 +74,10 @@ body {
     padding: 30px;
 }
 
+#description-card {
+    border: solid 2px var(--primary-blue);
+}
+
 .member-avatar {
     width: 36px;
     height: 36px;
@@ -116,6 +120,28 @@ body {
     min-height: 400px;
 }
 
+.grid-view-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.grid-view-container.hidden {
+    display: none;
+}
+
+.control-buttons .btn.active {
+    background-color: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+.control-buttons .btn.active:hover {
+    background-color: #2d2db8;
+    border-color: #2d2db8;
+}
+
 .task-card {
     background-color: #FAFBFC;
     border: 1px solid var(--border-color);
@@ -128,7 +154,7 @@ body {
 
 .task-card:hover {
     box-shadow: var(--shadow-hover);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .task-card-header {
@@ -318,14 +344,121 @@ body {
     background-color: #FFF4E5;
 }
 
+.task-card-menu-container {
+    position: relative;
+}
+
 .task-card-menu {
     color: var(--text-secondary);
     cursor: pointer;
     padding: 4px;
+    transition: color 0.2s ease;
 }
 
 .task-card-menu:hover {
     color: var(--text-primary);
+}
+
+.task-card-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-hover);
+    min-width: 150px;
+    z-index: 1000;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #F8F9FA;
+}
+
+.dropdown-item.complete-task {
+    color: var(--priority-low);
+}
+
+.dropdown-item.complete-task:hover {
+    background-color: #E5F9ED;
+}
+
+.dropdown-item.delete-task {
+    color: var(--priority-high);
+}
+
+.dropdown-item.delete-task:hover {
+    background-color: #FFE5E5;
+}
+
+.dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.column-header-menu-container {
+    position: relative;
+}
+
+.column-header-menu {
+    transition: color 0.2s ease;
+}
+
+.column-header-menu:hover {
+    color: var(--text-primary) !important;
+}
+
+.column-header-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-hover);
+    min-width: 180px;
+    z-index: 1000;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.no-tasks-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--text-primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-hover);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.no-tasks-toast.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 
