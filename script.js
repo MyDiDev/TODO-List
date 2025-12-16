@@ -86,7 +86,6 @@ class TaskManager {
 
         document.getElementById('closePreviewModal').onclick = () => this.closePreviewModal();
         document.getElementById('closePreviewModalBtn').onclick = () => this.closePreviewModal();
-
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.task-card-menu-container')) {
                 document.querySelectorAll('.task-card-dropdown').forEach(menu => {
@@ -100,6 +99,7 @@ class TaskManager {
             }
         });
 
+
         document.querySelectorAll('.column-header-menu').forEach(menuIcon => {
             menuIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -109,25 +109,28 @@ class TaskManager {
         });
 
         document.querySelectorAll('.toggle-column-tasks').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const status = btn.getAttribute('data-column-status');
-                this.toggleColumnTasksByStatus(status);
-                this.toggleColumnMenu(status);
-            });
-        });
 
-        document.querySelectorAll('.column-header').forEach(header => {
-            header.addEventListener('click', (e) => {
-                if (e.target.closest('.column-header-menu-container')) {
-                    return;
-                }
-                const column = header.closest('.task-column');
-                if (!column) return;
-                const list = column.querySelector('.task-list');
-                if (!list) return;
-                const isHidden = list.style.display === 'none';
-                list.style.display = isHidden ? '' : 'none';
+            document.querySelectorAll('.complete-all-tasks').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const status = btn.getAttribute('data-column-status');
+                    this.toggleColumnTasksByStatus(status);
+                    this.toggleColumnMenu(status);
+                });
+            });
+
+            document.querySelectorAll('.column-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    if (e.target.closest('.column-header-menu-container')) {
+                        return;
+                    }
+                    const column = header.closest('.task-column');
+                    if (!column) return;
+                    const list = column.querySelector('.task-list');
+                    if (!list) return;
+                    const isHidden = list.style.display === 'none';
+                    list.style.display = isHidden ? '' : 'none';
+                });
             });
         });
     }
@@ -239,7 +242,6 @@ class TaskManager {
 
     confirmDelete() {
         if (this.taskToDelete !== null) {
-
             this.tasks = this.tasks.filter(t => t.id !== this.taskToDelete);
             this.taskToDelete = null;
         } else if (this.statusToDelete !== null) {
