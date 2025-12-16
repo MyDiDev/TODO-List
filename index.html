@@ -95,14 +95,8 @@
                             <div class="column-header-menu-container" style="position: relative;">
                                 <i class="fas fa-ellipsis-v text-muted column-header-menu" style="cursor: pointer;" data-column-status="in-progress"></i>
                                 <div class="column-header-dropdown" id="column-menu-in-progress" style="display: none;">
-                                    <button class="dropdown-item complete-all-tasks" data-column-status="in-progress">
-                                        <i class="fas fa-check"></i> Completar Todas
-                                    </button>
-                                    <button class="dropdown-item move-to-completed" data-column-status="in-progress">
-                                        <i class="fas fa-arrow-right"></i> Mover a Completadas
-                                    </button>
-                                    <button class="dropdown-item delete-all-tasks" data-column-status="in-progress">
-                                        <i class="fas fa-trash"></i> Eliminar Todas
+                                    <button class="dropdown-item toggle-column-tasks" data-column-status="in-progress">
+                                        <i class="fas fa-eye-slash"></i> Mostrar/Ocultar Tareas
                                     </button>
                                 </div>
                             </div>
@@ -121,11 +115,8 @@
                             <div class="column-header-menu-container" style="position: relative;">
                                 <i class="fas fa-ellipsis-v text-muted column-header-menu" style="cursor: pointer;" data-column-status="completed"></i>
                                 <div class="column-header-dropdown" id="column-menu-completed" style="display: none;">
-                                    <button class="dropdown-item move-to-in-progress" data-column-status="completed">
-                                        <i class="fas fa-arrow-left"></i> Mover a En Progreso
-                                    </button>
-                                    <button class="dropdown-item delete-all-tasks" data-column-status="completed">
-                                        <i class="fas fa-trash"></i> Eliminar Todas
+                                    <button class="dropdown-item toggle-column-tasks" data-column-status="completed">
+                                        <i class="fas fa-eye-slash"></i> Mostrar/Ocultar Tareas
                                     </button>
                                 </div>
                             </div>
@@ -145,17 +136,8 @@
                             <div class="column-header-menu-container" style="position: relative;">
                                 <i class="fas fa-ellipsis-v text-muted column-header-menu" style="cursor: pointer;" data-column-status="overdue"></i>
                                 <div class="column-header-dropdown" id="column-menu-overdue" style="display: none;">
-                                    <button class="dropdown-item complete-all-tasks" data-column-status="overdue">
-                                        <i class="fas fa-check"></i> Completar Todas
-                                    </button>
-                                    <button class="dropdown-item move-to-in-progress" data-column-status="overdue">
-                                        <i class="fas fa-arrow-left"></i> Mover a En Progreso
-                                    </button>
-                                    <button class="dropdown-item move-to-completed" data-column-status="overdue">
-                                        <i class="fas fa-arrow-right"></i> Mover a Completadas
-                                    </button>
-                                    <button class="dropdown-item delete-all-tasks" data-column-status="overdue">
-                                        <i class="fas fa-trash"></i> Eliminar Todas
+                                    <button class="dropdown-item toggle-column-tasks" data-column-status="overdue">
+                                        <i class="fas fa-eye-slash"></i> Mostrar/Ocultar Tareas
                                     </button>
                                 </div>
                             </div>
@@ -208,24 +190,6 @@
                                     <option value="medium">Media</option>
                                     <option value="high">Alta</option>
                                 </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskStatus" class="form-label fw-semibold">Estado *</label>
-                            <select class="form-select" id="taskStatus" name="status" required>
-                                <option value="in-progress">En Progreso</option>
-                                <option value="completed">Completada</option>
-                                <option value="overdue">Atrasada</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Progreso (completada/total) *</label>
-                            <div class="progress-input d-flex align-items-center gap-2">
-                                <input type="number" class="form-control" style="width: 80px;"
-                                    id="taskProgressCompleted" name="progressCompleted" min="0" value="0">
-                                <span class="fs-5 text-muted">/</span>
-                                <input type="number" class="form-control" style="width: 80px;" id="taskProgressTotal"
-                                    name="progressTotal" min="1" value="1">
                             </div>
                         </div>
                     </div>

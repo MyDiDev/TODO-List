@@ -133,10 +133,25 @@ class TaskManager {
     }
 
     toggleColumnTasksByStatus(status) {
-        const list = document.querySelector(`.task-list[data-status="${status}"]`);
+        const menuIcon = document.querySelector(`.column-header-menu[data-column-status="${status}"]`);
+        if (!menuIcon) return;
+
+        const column = menuIcon.closest('.task-column');
+        if (!column) return;
+
+        const list = column.querySelector('.task-list');
         if (!list) return;
-        const isHidden = list.style.display === 'none';
-        list.style.display = isHidden ? '' : 'none';
+
+        const toggleBtn = document.querySelector(`.toggle-column-tasks[data-column-status="${status}"]`);
+
+        const isHidden = list.classList.toggle('is-hidden');
+        list.style.display = isHidden ? 'none' : '';
+
+        if (toggleBtn) {
+            toggleBtn.innerHTML = `
+                <i class="fas ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></i> ${isHidden ? 'Mostrar Tareas' : 'Ocultar Tareas'}
+            `;
+        }
     }
 
     openModal(task = null) {
@@ -152,7 +167,6 @@ class TaskManager {
             document.getElementById('taskTime').value = task.time || '';
             document.getElementById('taskSubject').value = task.subject;
             document.getElementById('taskPriority').value = task.priority;
-            document.getElementById('taskStatus').value = task.status;
         } else {
             modalTitle.textContent = 'Agregar Nueva Tarea';
             this.currentEditId = null;
@@ -179,32 +193,25 @@ class TaskManager {
             date: document.getElementById('taskDate').value,
             time: document.getElementById('taskTime').value,
             subject: document.getElementById('taskSubject').value,
-            priority: document.getElementById('taskPriority').value,
-            status: document.getElementById('taskStatus').value
+            priority: document.getElementById('taskPriority').value
         };
 
-        if (formData.status !== 'completed') {
-            const taskDate = new Date(formData.date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            taskDate.setHours(0, 0, 0, 0);
-
-            if (taskDate < today) {
-                formData.status = 'overdue';
-            } else if (formData.status !== 'in-progress') {
-                formData.status = 'in-progress';
-            }
-        }
+        const taskDate = new Date(formData.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        const status = taskDate < today ? 'overdue' : 'in-progress';
 
         if (this.currentEditId) {
             const index = this.tasks.findIndex(t => t.id === this.currentEditId);
             if (index !== -1) {
-                this.tasks[index] = { ...this.tasks[index], ...formData };
+                this.tasks[index] = { ...this.tasks[index], ...formData, status };
             }
         } else {
             const newTask = {
                 id: this.generateId(),
                 ...formData,
+                status,
                 createdAt: new Date().toISOString()
             };
             this.tasks.push(newTask);
