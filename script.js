@@ -21,9 +21,7 @@ class TaskManager {
     }
 
     loadTasks() {
-        const stored = localStorage.getItem('tasks');
-        if (stored) return JSON.parse(stored);
-        return [];
+        return JSON.parse(localStorage.getItem('tasks')) || [];
     }
 
     saveTasks() {
@@ -42,29 +40,22 @@ class TaskManager {
 
     setupEventListeners() {
         document.getElementById('addTaskBtn').onclick = () => this.openModal();
-
         document.getElementById('closeModal').onclick = () => this.closeModal();
 
         document.getElementById('cancelBtn').onclick = () => this.closeModal();
-
         document.getElementById('taskForm').onsubmit = (e) => {
             e.preventDefault();
             this.saveTask();
         }
 
         document.getElementById('filterBtn').onclick = () => this.openFilterModal();
-
         document.getElementById('sortBtn').onclick = () => this.openFilterModal();
 
         document.getElementById('closeFilterModal').onclick = () => this.closeFilterModal();
 
         document.getElementById('applyFilters').onclick = () => this.applyFilters();
-
         document.getElementById('clearFilters').onclick = () => this.clearFilters();
-
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            this.searchTasks(e.target.value);
-        });
+        document.getElementById('searchInput').addEventListener('input', (e) => { this.searchTasks(e.target.value); });
 
         document.getElementById('previewBtn').onclick = () => this.toggleViewMode();
 
@@ -96,7 +87,6 @@ class TaskManager {
         document.getElementById('closePreviewModal').onclick = () => this.closePreviewModal();
         document.getElementById('closePreviewModalBtn').onclick = () => this.closePreviewModal();
 
-        // Close dropdown menus when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.task-card-menu-container')) {
                 document.querySelectorAll('.task-card-dropdown').forEach(menu => {
@@ -110,7 +100,6 @@ class TaskManager {
             }
         });
 
-        // Column header menu listeners
         document.querySelectorAll('.column-header-menu').forEach(menuIcon => {
             menuIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -119,38 +108,35 @@ class TaskManager {
             });
         });
 
-        // Column header menu action listeners
-        document.querySelectorAll('.complete-all-tasks').forEach(btn => {
+        document.querySelectorAll('.toggle-column-tasks').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const status = btn.getAttribute('data-column-status');
-                this.completeAllTasks(status);
+                this.toggleColumnTasksByStatus(status);
+                this.toggleColumnMenu(status);
             });
         });
 
-        document.querySelectorAll('.delete-all-tasks').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const status = btn.getAttribute('data-column-status');
-                this.deleteAllTasks(status);
+        document.querySelectorAll('.column-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                if (e.target.closest('.column-header-menu-container')) {
+                    return;
+                }
+                const column = header.closest('.task-column');
+                if (!column) return;
+                const list = column.querySelector('.task-list');
+                if (!list) return;
+                const isHidden = list.style.display === 'none';
+                list.style.display = isHidden ? '' : 'none';
             });
         });
+    }
 
-        document.querySelectorAll('.move-to-completed').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const status = btn.getAttribute('data-column-status');
-                this.moveAllTasksToStatus(status, 'completed');
-            });
-        });
-
-        document.querySelectorAll('.move-to-in-progress').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const status = btn.getAttribute('data-column-status');
-                this.moveAllTasksToStatus(status, 'in-progress');
-            });
-        });
+    toggleColumnTasksByStatus(status) {
+        const list = document.querySelector(`.task-list[data-status="${status}"]`);
+        if (!list) return;
+        const isHidden = list.style.display === 'none';
+        list.style.display = isHidden ? '' : 'none';
     }
 
     openModal(task = null) {
@@ -167,14 +153,10 @@ class TaskManager {
             document.getElementById('taskSubject').value = task.subject;
             document.getElementById('taskPriority').value = task.priority;
             document.getElementById('taskStatus').value = task.status;
-            document.getElementById('taskProgressCompleted').value = task.progressCompleted || 0;
-            document.getElementById('taskProgressTotal').value = task.progressTotal || 1;
         } else {
             modalTitle.textContent = 'Agregar Nueva Tarea';
             this.currentEditId = null;
             form.reset();
-            document.getElementById('taskProgressCompleted').value = 0;
-            document.getElementById('taskProgressTotal').value = 1;
         }
 
         if (this.taskModal) {
@@ -198,9 +180,7 @@ class TaskManager {
             time: document.getElementById('taskTime').value,
             subject: document.getElementById('taskSubject').value,
             priority: document.getElementById('taskPriority').value,
-            status: document.getElementById('taskStatus').value,
-            progressCompleted: parseInt(document.getElementById('taskProgressCompleted').value) || 0,
-            progressTotal: parseInt(document.getElementById('taskProgressTotal').value) || 1
+            status: document.getElementById('taskStatus').value
         };
 
         if (formData.status !== 'completed') {
@@ -252,11 +232,10 @@ class TaskManager {
 
     confirmDelete() {
         if (this.taskToDelete !== null) {
-            // Single task deletion
+
             this.tasks = this.tasks.filter(t => t.id !== this.taskToDelete);
             this.taskToDelete = null;
         } else if (this.statusToDelete !== null) {
-            // Bulk deletion
             this.tasks = this.tasks.filter(t => t.status !== this.statusToDelete);
             this.statusToDelete = null;
         }
@@ -337,6 +316,7 @@ class TaskManager {
         const dropdown = card.querySelector('.task-card-dropdown');
         const completeBtn = card.querySelector('.complete-task');
         const deleteBtn = card.querySelector('.delete-task');
+        const moveToInProgressBtn = card.querySelector('.move-to-in-progress-task');
 
         if (menuIcon && dropdown) {
             menuIcon.addEventListener('click', (e) => {
@@ -358,6 +338,13 @@ class TaskManager {
                 this.deleteTask(taskId);
             });
         }
+
+        if (moveToInProgressBtn) {
+            moveToInProgressBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.moveTaskToInProgress(taskId);
+            });
+        }
     }
 
     toggleTaskMenu(taskId) {
@@ -377,6 +364,22 @@ class TaskManager {
         const task = this.tasks.find(t => t.id === id);
         if (task) {
             task.status = 'completed';
+            this.saveTasks();
+            this.renderTasks();
+            this.updateTaskCounts();
+            const menu = document.getElementById(`menu-${id}`);
+            if (menu) menu.style.display = 'none';
+        }
+    }
+
+    moveTaskToInProgress(id) {
+        const task = this.tasks.find(t => t.id === id);
+        if (task) {
+            if (this.isTaskDateOverdue(task)) {
+                task.status = 'overdue';
+            } else {
+                task.status = 'in-progress';
+            }
             this.saveTasks();
             this.renderTasks();
             this.updateTaskCounts();
@@ -540,6 +543,9 @@ class TaskManager {
 
         const categoryClass = task.subject.toLowerCase().includes('ux') || task.subject.toLowerCase().includes('design') ? 'category-ux' : 'category-dev';
         const isDescriptionLong = task.description.length > 100;
+        const normalizedStatus = (task.status || '').toString().trim().toLowerCase().replace(/\s+/g, '-');
+        const isInProgress = normalizedStatus === 'in-progress';
+        const isCompleted = normalizedStatus === 'completed';
 
         card.innerHTML = `
             <div class="task-card-header">
@@ -552,9 +558,14 @@ class TaskManager {
                 <div class="task-card-menu-container" style="position: relative;">
                     <i class="fas fa-ellipsis-v task-card-menu" data-task-id="${task.id}"></i>
                     <div class="task-card-dropdown" id="menu-${task.id}" style="display: none;">
-                        ${task.status !== 'completed' ? `
+                        ${!isCompleted ? `
                         <button class="dropdown-item complete-task" data-task-id="${task.id}">
                             <i class="fas fa-check"></i> Completar
+                        </button>
+                        ` : ''}
+                        ${!isInProgress ? `
+                        <button class="dropdown-item move-to-in-progress-task" data-task-id="${task.id}">
+                            <i class="fas fa-play"></i> Mover a En Progreso
                         </button>
                         ` : ''}
                         <button class="dropdown-item delete-task" data-task-id="${task.id}">
@@ -567,22 +578,26 @@ class TaskManager {
             <p class="task-description" id="desc-${task.id}">${task.description}</p>
             ${isDescriptionLong ? `<span class="see-more" id="see-more-${task.id}" onclick="window.taskManager.toggleDescription(${task.id})">Ver más</span>` : ''}
             <div class="task-footer">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="task-progress">
-                        <i class="fas fa-tasks"></i>
-                        <span>${task.progressCompleted || 0}/${task.progressTotal || 1}</span>
-                    </div>
-                </div>
+                <div></div>
                 <div class="task-actions">
-                    <button class="task-action view" onclick="window.taskManager.viewTask(${task.id})" title="View">
-                        <i class="fas fa-eye"></i>
+                    ${isInProgress ? `
+                    <button class="task-action complete" onclick="window.taskManager.completeTask(${task.id})" title="Completar">
+                        <i class="fas fa-check"></i>
                     </button>
-                    <button class="task-action delete" onclick="window.taskManager.deleteTask(${task.id})" title="Delete">
+                    <button class="task-action delete" onclick="window.taskManager.deleteTask(${task.id})" title="Eliminar">
                         <i class="fas fa-trash"></i>
                     </button>
-                    <button class="task-action edit" onclick="window.taskManager.editTask(${task.id})" title="Edit">
+                    ` : `
+                    <button class="task-action view" onclick="window.taskManager.viewTask(${task.id})" title="Ver">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="task-action delete" onclick="window.taskManager.deleteTask(${task.id})" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="task-action edit" onclick="window.taskManager.editTask(${task.id})" title="Editar">
                         <i class="fas fa-pencil-alt"></i>
                     </button>
+                    `}
                 </div>
             </div>
         `;
@@ -642,10 +657,6 @@ class TaskManager {
         const statusClass = task.status === 'completed' ? 'success' :
             task.status === 'in-progress' ? 'primary' : 'danger';
         statusElement.innerHTML = `<span class="badge bg-${statusClass}">${statusText}</span>`;
-
-        const progress = task.progressCompleted || 0;
-        const total = task.progressTotal || 1;
-        document.getElementById('previewTaskProgress').textContent = `${progress} / ${total}`;
 
         const tagsContainer = document.getElementById('previewTaskTags');
         tagsContainer.innerHTML = '';
